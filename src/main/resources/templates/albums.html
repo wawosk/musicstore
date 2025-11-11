@@ -68,13 +68,16 @@
 
                     <p class="price" th:text="'$' + ${#numbers.formatDecimal(album.price, 1, 2)}"></p>
                     <div class="album-actions">
-                        <a th:href="@{/album/{id}(id=${album.id})}" class="btn btn-secondary">Szczegóły</a>
-                        <form th:action="@{/cart/add}" method="post" style="display: inline;"
-                              th:if="${album.available}">
-                            <input type="hidden" name="albumId" th:value="${album.id}">
-                            <input type="hidden" name="quantity" value="1">
-                            <button type="submit" class="btn btn-primary">Dodaj do koszyka</button>
-                        </form>
+                        <a th:href="@{/album/{id}(id=${album.id})}" class="btn btn-secondary">Zobacz produkt</a>
+
+                        <!-- ZMIENIONE: form na button z atrybutem data -->
+                        <button type="button"
+                                class="btn btn-primary add-to-cart-btn"
+                                th:data-album-id="${album.id}"
+                                th:disabled="${!album.available}">
+                            Dodaj do koszyka
+                        </button>
+
                         <button th:unless="${album.available}" class="btn btn-disabled" disabled>
                             Niedostępny
                         </button>

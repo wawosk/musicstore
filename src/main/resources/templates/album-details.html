@@ -19,68 +19,92 @@
         </div>
 
         <div class="album-detail" th:if="${album != null}">
-            <div class="album-detail-image">
-                <img th:src="${album.imageUrl}" th:alt="${album.title}"
-                     th:attr="data-title=${album.title}"
-                     onerror="handleImageError(this)">
+            <!-- SEKCJA 1: GÓRA - Informacje i dodawanie do koszyka -->
+            <div class="album-top-section">
+                <div class="album-detail-image">
+                    <img th:src="${album.imageUrl}" th:alt="${album.title}"
+                         th:attr="data-title=${album.title}"
+                         onerror="handleImageError(this)">
 
-                <!-- Etykiety dostępności na obrazku -->
-                <div class="availability-labels">
-                    <span th:if="${album.lowStock}" class="label label-warning">Ostatnie sztuki!</span>
-                    <span th:if="${album.preorder}" class="label label-info">Przedpremiera</span>
-                    <span th:if="${album.limitedEdition}" class="label label-premium">Limitowana edycja</span>
-                    <span th:if="${album.outOfStock}" class="label label-danger">Niedostępny</span>
+                    <!-- Etykiety dostępności na obrazku -->
+                    <div class="availability-labels">
+                        <span th:if="${album.lowStock}" class="label label-warning">Ostatnie sztuki!</span>
+                        <span th:if="${album.preorder}" class="label label-info">Przedpremiera</span>
+                        <span th:if="${album.limitedEdition}" class="label label-premium">Limitowana edycja</span>
+                        <span th:if="${album.outOfStock}" class="label label-danger">Niedostępny</span>
+                    </div>
+                </div>
+                <div class="album-detail-info">
+                    <h1 th:text="${album.title}"></h1>
+                    <p class="artist" th:text="${album.artist}"></p>
+                    <div class="album-meta">
+                        <span class="genre" th:text="${album.genre}"></span>
+                        <span class="year" th:text="${album.releaseYear}"></span>
+                    </div>
+
+                    <!-- Komunikat o dostępności -->
+                    <div class="availability-banner" th:classappend="|availability-${album.availabilityStatus}|">
+                        <span th:text="${album.availabilityMessage}"></span>
+                        <span th:if="${album.lowStock}" class="stock-count" th:text="' Pozostało tylko ' + ${album.stockQuantity} + ' egzemplarzy!'"></span>
+                    </div>
+
+                    <p class="price" th:text="'$' + ${#numbers.formatDecimal(album.price, 1, 2)}"></p>
+
+                    <p class="description" th:text="${album.description}"></p>
+
+                    <!-- Informacje dodatkowe -->
+                    <div class="album-details" th:if="${album.limitedEdition or album.preorder or album.lowStock}">
+                        <h3>Informacje dodatkowe</h3>
+                        <ul>
+                            <li th:if="${album.limitedEdition}">✓ Limitowana edycja - kolekcjonerski egzemplarz</li>
+                            <li th:if="${album.preorder}">✓ Zamówienie przedpremierowe - wysyłka: <span th:text="${album.availableFrom}"></span></li>
+                            <li th:if="${album.lowStock}">✓ Ostatnie egzemplarze w magazynie</li>
+                        </ul>
+                    </div>
+
+                    <!-- ZMIENIONE: Formularz z obsługą AJAX -->
+                    <div class="add-to-cart-form" th:if="${album.available}">
+                        <div class="quantity-selector">
+                            <label for="quantity">Ilość:</label>
+                            <input type="number" id="quantity" name="quantity" value="1"
+                                   th:attr="max=${album.stockQuantity}" min="1" max="10" class="quantity-input">
+                            <span class="max-quantity" th:if="${album.stockQuantity lt 10}"
+                                  th:text="'Maksymalnie: ' + ${album.stockQuantity}"></span>
+                        </div>
+                        <button type="button"
+                                class="btn btn-primary btn-large add-to-cart-btn"
+                                th:data-album-id="${album.id}">
+                            Dodaj do koszyka
+                        </button>
+                    </div>
+
+                    <!-- Komunikat dla niedostępnych produktów -->
+                    <div th:unless="${album.available}" class="not-available">
+                        <p class="not-available-message" th:text="${album.availabilityMessage}"></p>
+                        <button class="btn btn-disabled btn-large" disabled>Produkt niedostępny</button>
+                    </div>
+
+                    <div class="album-actions">
+                        <a th:href="@{/albums}" class="btn btn-secondary">← Wróć do przeglądania</a>
+                    </div>
                 </div>
             </div>
-            <div class="album-detail-info">
-                <h1 th:text="${album.title}"></h1>
-                <p class="artist" th:text="${album.artist}"></p>
-                <div class="album-meta">
-                    <span class="genre" th:text="${album.genre}"></span>
-                    <span class="year" th:text="${album.releaseYear}"></span>
+
+            <!-- SEKCJA 2: DÓŁ - Galeria "Zawartość" -->
+            <div class="album-bottom-section" th:if="${not #lists.isEmpty(album.additionalImages)}">
+                <div class="section-divider">
+                    <span class="divider-text">Zawartość</span>
                 </div>
 
-                <!-- Komunikat o dostępności -->
-                <div class="availability-banner" th:classappend="|availability-${album.availabilityStatus}|">
-                    <span th:text="${album.availabilityMessage}"></span>
-                    <span th:if="${album.lowStock}" class="stock-count" th:text="' Pozostało tylko ' + ${album.stockQuantity} + ' egzemplarzy!'"></span>
-                </div>
-
-                <p class="price" th:text="'$' + ${#numbers.formatDecimal(album.price, 1, 2)}"></p>
-
-                <p class="description" th:text="${album.description}"></p>
-
-                <!-- Informacje dodatkowe -->
-                <div class="album-details" th:if="${album.limitedEdition or album.preorder or album.lowStock}">
-                    <h3>Informacje dodatkowe</h3>
-                    <ul>
-                        <li th:if="${album.limitedEdition}">✓ Limitowana edycja - kolekcjonerski egzemplarz</li>
-                        <li th:if="${album.preorder}">✓ Zamówienie przedpremierowe - wysyłka: <span th:text="${album.availableFrom}"></span></li>
-                        <li th:if="${album.lowStock}">✓ Ostatnie egzemplarze w magazynie</li>
-                    </ul>
-                </div>
-
-                <!-- Formularz dodawania do koszyka dla dostępnych produktów -->
-                <form th:action="@{/cart/add}" method="post" class="add-to-cart-form" th:if="${album.available}">
-                    <input type="hidden" name="albumId" th:value="${album.id}">
-                    <div class="quantity-selector">
-                        <label for="quantity">Ilość:</label>
-                        <input type="number" id="quantity" name="quantity" value="1"
-                               th:attr="max=${album.stockQuantity}" min="1" max="10">
-                        <span class="max-quantity" th:if="${album.stockQuantity lt 10}"
-                              th:text="'Maksymalnie: ' + ${album.stockQuantity}"></span>
+                <div class="gallery-container">
+                    <div class="vertical-gallery">
+                        <div class="gallery-item" th:each="image, iter : ${album.additionalImages}">
+                            <img th:src="${image}"
+                                 th:alt="${album.title + ' - zdjęcie ' + (iter.index + 1)}"
+                                 th:attr="data-title=${album.title}"
+                                 onerror="handleImageError(this)">
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-large">Dodaj do koszyka</button>
-                </form>
-
-                <!-- Komunikat dla niedostępnych produktów -->
-                <div th:unless="${album.available}" class="not-available">
-                    <p class="not-available-message" th:text="${album.availabilityMessage}"></p>
-                    <button class="btn btn-disabled btn-large" disabled>Produkt niedostępny</button>
-                </div>
-
-                <div class="album-actions">
-                    <a th:href="@{/albums}" class="btn btn-secondary">← Wróć do przeglądania</a>
                 </div>
             </div>
         </div>

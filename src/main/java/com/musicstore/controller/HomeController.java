@@ -9,7 +9,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class HomeController {
@@ -102,24 +104,24 @@ public class HomeController {
         return "redirect:/cart";
     }
 
-    @PostMapping("/cart/checkout")
-    public String checkout(RedirectAttributes redirectAttributes) {
-        if (cartService.checkout()) {
-            redirectAttributes.addFlashAttribute("success", "Zamówienie złożone pomyślnie!");
-        } else {
-            redirectAttributes.addFlashAttribute("error", "Niektóre produkty są niedostępne w wymaganej ilości.");
-        }
-        return "redirect:/cart";
-    }
+    // USUNIĘTE: Stara metoda checkout - powodowała konflikt
+    // @PostMapping("/cart/checkout")
+    // public String checkout(RedirectAttributes redirectAttributes) {
+    //     if (cartService.checkout()) {
+    //         redirectAttributes.addFlashAttribute("success", "Zamówienie złożone pomyślnie!");
+    //     } else {
+    //         redirectAttributes.addFlashAttribute("error", "Niektóre produkty są niedostępne w wymaganej ilości.");
+    //     }
+    //     return "redirect:/cart";
+    // }
 
     // Endpoint dla AJAX - liczba produktów w koszyku
     @GetMapping("/cart/count")
     @ResponseBody
-    public int getCartCount() {
-        return cartService.getCartItemCount();
+    public Map<String, Integer> getCartCount() {
+        int count = cartService.getCartItemCount();
+        return Collections.singletonMap("count", count);
     }
-
-
 
     @GetMapping("/albums/new")
     public String newAlbums(Model model) {
@@ -141,8 +143,56 @@ public class HomeController {
         return "albums";
     }
 
+    @GetMapping("/checkout")
+    public String checkout(Model model) {
+        if (cartService.isEmpty()) {
+            return "redirect:/cart";
+        }
+        model.addAttribute("cartItems", cartService.getCartItems());
+        model.addAttribute("total", cartService.getTotal());
+        return "checkout";
+    }
 
+    // NOWA METODA: Przetwarzanie zamówienia z formularza
+    @PostMapping("/checkout/process")
+    public String processCheckout(
+            @RequestParam String firstName,
+            @RequestParam String lastName,
+            @RequestParam String email,
+            @RequestParam String phone,
+            @RequestParam String address,
+            @RequestParam String postalCode,
+            @RequestParam String city,
+            @RequestParam String country,
+            @RequestParam String deliveryMethod,
+            @RequestParam String paymentMethod,
+            @RequestParam(required = false) String notes,
+            RedirectAttributes redirectAttributes) {
 
+        if (cartService.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Koszyk jest pusty.");
+            return "redirect:/cart";
+        }
 
+        // Tutaj w prawdziwej aplikacji zapisalibyśmy zamówienie do bazy danych
+        // i przetworzyli płatność
 
+        boolean checkoutSuccess = cartService.checkout();
+        if (checkoutSuccess) {
+            redirectAttributes.addFlashAttribute("success",
+                    "Zamówienie złożone pomyślnie! Numer zamówienia: #" +
+                            System.currentTimeMillis()); // Tymczasowy numer zamówienia
+            return "redirect:/order-confirmation";
+        } else {
+            redirectAttributes.addFlashAttribute("error",
+                    "Niektóre produkty są niedostępne w wymaganej ilości.");
+            return "redirect:/cart";
+        }
+    }
+
+    @GetMapping("/order-confirmation")
+    public String orderConfirmation(Model model) {
+        // Strona potwierdzenia zamówienia
+        return "order-confirmation";
+    }
 }

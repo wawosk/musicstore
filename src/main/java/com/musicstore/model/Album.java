@@ -2,6 +2,8 @@ package com.musicstore.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Album {
     private Long id;
@@ -12,18 +14,22 @@ public class Album {
     private BigDecimal price;
     private String description;
     private String imageUrl;
-    private int stockQuantity; // Ilość na stanie
-    private int lowStockThreshold; // Próg niskiego stanu magazynowego
-    private LocalDate availableFrom; // Data dostępności (dla przedpremier)
-    private boolean limitedEdition; // Czy to limitowana edycja
+    private int stockQuantity;
+    private int lowStockThreshold;
+    private LocalDate availableFrom;
+    private boolean limitedEdition;
+    private List<String> additionalImages; // Lista dodatkowych obrazów
 
     // Konstruktory
-    public Album() {}
+    public Album() {
+        this.additionalImages = new ArrayList<>();
+    }
 
     public Album(Long id, String title, String artist, String genre,
                  int releaseYear, BigDecimal price, String description,
                  String imageUrl, int stockQuantity, int lowStockThreshold,
                  LocalDate availableFrom, boolean limitedEdition) {
+        this();
         this.id = id;
         this.title = title;
         this.artist = artist;
@@ -36,6 +42,15 @@ public class Album {
         this.lowStockThreshold = lowStockThreshold;
         this.availableFrom = availableFrom;
         this.limitedEdition = limitedEdition;
+    }
+
+    public Album(Long id, String title, String artist, String genre,
+                 int releaseYear, BigDecimal price, String description,
+                 String imageUrl, int stockQuantity, int lowStockThreshold,
+                 LocalDate availableFrom, boolean limitedEdition, List<String> additionalImages) {
+        this(id, title, artist, genre, releaseYear, price, description, imageUrl,
+                stockQuantity, lowStockThreshold, availableFrom, limitedEdition);
+        this.additionalImages = additionalImages != null ? additionalImages : new ArrayList<>();
     }
 
     // Gettery i settery
@@ -74,6 +89,21 @@ public class Album {
 
     public boolean isLimitedEdition() { return limitedEdition; }
     public void setLimitedEdition(boolean limitedEdition) { this.limitedEdition = limitedEdition; }
+
+    public List<String> getAdditionalImages() {
+        return additionalImages;
+    }
+
+    public void setAdditionalImages(List<String> additionalImages) {
+        this.additionalImages = additionalImages != null ? additionalImages : new ArrayList<>();
+    }
+
+    public void addAdditionalImage(String imageUrl) {
+        if (this.additionalImages == null) {
+            this.additionalImages = new ArrayList<>();
+        }
+        this.additionalImages.add(imageUrl);
+    }
 
     // Metody pomocnicze
     public boolean isLowStock() {

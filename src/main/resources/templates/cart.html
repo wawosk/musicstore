@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -60,7 +61,8 @@
                     <form th:action="@{/cart/clear}" method="post" style="display: inline;">
                         <button type="submit" class="btn btn-danger">Wyczyść koszyk</button>
                     </form>
-                    <button class="btn btn-primary">Przejdź do kasy</button>
+                    <!-- POPRAWIONE: Link do kasy -->
+                    <a th:href="@{/checkout}" class="btn btn-primary">Przejdź do kasy</a>
                 </div>
             </div>
         </div>
