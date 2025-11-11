@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koszyk - MusicStore</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div th:replace="fragments/header :: header"></div>
+
+<main>
+    <div class="container">
+        <div class="cart-container">
+            <h1>Twój koszyk</h1>
+
+            <div th:if="${isEmpty}" class="empty-cart">
+                <p>Twój koszyk jest pusty</p>
+                <a th:href="@{/albums}" class="btn btn-primary">Przeglądaj produkty</a>
+            </div>
+
+            <div th:unless="${isEmpty}">
+                <div class="cart-items">
+                    <div th:each="item : ${cartItems}" class="cart-item">
+                        <div class="cart-item-image">
+                            <img th:src="${item.album.imageUrl}" th:alt="${item.album.title}">
+                        </div>
+                        <div class="cart-item-info">
+                            <h3 th:text="${item.album.title}"></h3>
+                            <p class="artist" th:text="${item.album.artist}"></p>
+                            <p class="price" th:text="'$' + ${item.album.price}"></p>
+                        </div>
+                        <div class="cart-item-quantity">
+                            <form th:action="@{/cart/update}" method="post">
+                                <input type="hidden" name="albumId" th:value="${item.album.id}">
+                                <label for="quantity">Ilość:</label>
+                                <input type="number" name="quantity" th:value="${item.quantity}" min="1" max="10" class="quantity-input">
+                                <button type="submit" class="btn btn-secondary">Aktualizuj</button>
+                            </form>
+                        </div>
+                        <div class="cart-item-price">
+                            <span th:text="'$' + ${item.subtotal}"></span>
+                        </div>
+                        <div class="cart-item-remove">
+                            <form th:action="@{/cart/remove}" method="post">
+                                <input type="hidden" name="albumId" th:value="${item.album.id}">
+                                <button type="submit" class="btn btn-danger">Usuń</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cart-total">
+                    <h2>Razem: <span th:text="'$' + ${total}"></span></h2>
+                </div>
+
+                <div class="cart-actions">
+                    <a th:href="@{/albums}" class="btn btn-secondary">Kontynuuj zakupy</a>
+                    <form th:action="@{/cart/clear}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-danger">Wyczyść koszyk</button>
+                    </form>
+                    <button class="btn btn-primary">Przejdź do kasy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+<script th:src="@{/js/script.js}"></script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MusicStore - Sprzedaż płyt muzycznych</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div th:replace="fragments/header :: header"></div>
+
+<main>
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Doświadcz płyt muzycznych na nowo</h1>
+            <p>Najlepsze i najrzadsze albumy muzyczne w jednym miejscu, z dostawą prosto pod drzwi!</p>
+            <a th:href="@{/albums}" class="btn btn-primary">Kup płytę teraz</a>
+        </div>
+    </section>
+
+    <!-- Sekcja z wytwórniami muzycznymi po hero -->
+    <section class="record-labels">
+        <div class="container">
+            <h2>Współpracujemy z najlepszymi</h2>
+            <p class="section-subtitle">Oferujemy oryginalne wydania od największych wytwórni muzycznych na świecie</p>
+            <div class="labels-grid">
+                <div class="label-item">
+                    <div class="label-logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Sony_Music_Entertainment_Logo_2023.svg/1100px-Sony_Music_Entertainment_Logo_2023.svg.png" alt="Sony Music">
+                    </div>
+                    <p class="label-name">Sony Music</p>
+                </div>
+                <div class="label-item">
+                    <div class="label-logo">
+                        <img src="https://www.universalmusic.com/wp-content/uploads/2015/09/universal-music-group-logo.png" alt="Universal Music">
+                    </div>
+                    <p class="label-name">Universal Music</p>
+                </div>
+                <div class="label-item">
+                    <div class="label-logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Warner_Music_Group_logo_%282021%29.svg/1280px-Warner_Music_Group_logo_%282021%29.svg.png" alt="Warner Music">
+                    </div>
+                    <p class="label-name">Warner Music</p>
+                </div>
+                <div class="label-item">
+                    <div class="label-logo">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/EMI_Records_logo_%282020%29.svg/1200px-EMI_Records_logo_%282020%29.svg.png" alt="EMI">
+                    </div>
+                    <p class="label-name">EMI</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sekcja korzyści -->
+    <section class="features">
+        <div class="container">
+            <h2>Dlaczego warto wybrać nasz sklep?</h2>
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="feature-icon">🚚</div>
+                    <h3>Szybka dostawa</h3>
+                    <p>Dostarczamy zamówienia w ciągu 24-48 godzin</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎧</div>
+                    <h3>Wysoka jakość</h3>
+                    <p>Oferujemy tylko oryginalne wydania płyt</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⭐</div>
+                    <h3>Najrzadsze wydania</h3>
+                    <p>Znajdziesz u nas preordery i limitowane edycje wielu albumów</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sekcja opinii klientów (demo Trustpilot) -->
+    <section class="customer-reviews">
+        <div class="container">
+            <h2>Opinie klientów</h2>
+            <p class="section-subtitle">Zadowolenie klientów to nasz priorytet</p>
+            <div class="trustpilot-demo-widget">
+                <div class="rating-summary">
+                    <div class="stars">★★★★★</div>
+                    <div class="rating-score">4.9 / 5.0</div>
+                    <div class="review-count">na podstawie 356 opinii</div>
+                </div>
+                <div class="review-list">
+                    <div class="review">
+                        <p class="review-text">„Świetny sklep! Szybka wysyłka i doskonała obsługa.”</p>
+                        <p class="review-author">– Jan Kowalski</p>
+                    </div>
+                    <div class="review">
+                        <p class="review-text">„Ogromny wybór płyt, wszystko w oryginalnym wydaniu.”</p>
+                        <p class="review-author">– Anna Nowak</p>
+                    </div>
+                    <div class="review">
+                        <p class="review-text">„Zamówienie dotarło następnego dnia! Polecam wszystkim.”</p>
+                        <p class="review-author">– Piotr Wiśniewski</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Polecane albumy -->
+    <section class="featured-albums">
+        <div class="container">
+            <h2>Polecane albumy</h2>
+            <p class="section-subtitle">Sprawdź nasze najnowsze i najbardziej popularne pozycje</p>
+            <div class="album-grid">
+                <div class="album-card" th:each="album : ${featuredAlbums}">
+                    <div class="album-image">
+                        <img th:src="${album.imageUrl}" th:alt="${album.title}">
+                    </div>
+                    <div class="album-info">
+                        <h3 th:text="${album.title}"></h3>
+                        <p class="artist" th:text="${album.artist}"></p>
+                        <p class="price" th:text="'$' + ${album.price}"></p>
+                        <a th:href="@{/album/{id}(id=${album.id})}" class="btn btn-secondary">Szczegóły</a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center" style="margin-top: 2rem;">
+                <a th:href="@{/albums}" class="btn btn-primary">Zobacz wszystkie albumy</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+<script th:src="@{/js/script.js}"></script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wszystkie płyty - MusicStore</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div th:replace="fragments/header :: header"></div>
+
+<main>
+    <div class="container">
+        <div class="page-header">
+            <h1 th:text="${pageTitle != null ? pageTitle : 'Nasza kolekcja płyt'}">Nasza kolekcja płyt</h1>
+            <p th:if="${pageTitle == null}">Odkryj najlepsze albumy muzyczne wszystkich gatunków</p>
+            <p th:if="${pageTitle == 'Nowe albumy'}">Najnowsze wydania i świeże brzmienia</p>
+            <p th:if="${pageTitle == 'Przedpremiery'}">Zarezerwuj albumy przed premierą</p>
+        </div>
+
+        <!-- Filtr gatunków -->
+        <div class="albums-filter">
+            <form th:action="@{/albums}" method="get" class="filter-form">
+                <label for="genre">Filtruj według gatunku:</label>
+                <select id="genre" name="genre" onchange="this.form.submit()">
+                    <option value="">Wszystkie gatunki</option>
+                    <option th:each="genre : ${genres}"
+                            th:value="${genre}"
+                            th:text="${genre}"
+                            th:selected="${param.genre != null and #strings.equals(genre, param.genre[0])}">
+                    </option>
+                </select>
+            </form>
+        </div>
+
+        <!-- Liczba znalezionych albumów -->
+        <div class="results-info" th:if="${albums != null and !albums.isEmpty()}">
+            <p th:text="'Znaleziono ' + ${albums.size()} + ' albumów'"></p>
+        </div>
+
+        <!-- Siatka albumów -->
+        <div class="album-grid" th:if="${albums != null and !albums.isEmpty()}">
+            <div class="album-card" th:each="album : ${albums}">
+                <div class="album-image">
+                    <img th:src="${album.imageUrl}" th:alt="${album.title}"
+                         th:attr="data-title=${album.title}"
+                         onerror="handleImageError(this)">
+
+                    <!-- Etykiety dostępności -->
+                    <div class="availability-labels">
+                        <span th:if="${album.lowStock}" class="label label-warning">Ostatnie sztuki!</span>
+                        <span th:if="${album.preorder}" class="label label-info">Przedpremiera</span>
+                        <span th:if="${album.limitedEdition}" class="label label-premium">Limitowana edycja</span>
+                        <span th:if="${album.outOfStock}" class="label label-danger">Niedostępny</span>
+                    </div>
+                </div>
+                <div class="album-info">
+                    <h3 th:text="${album.title}"></h3>
+                    <p class="artist" th:text="${album.artist}"></p>
+                    <p class="genre-year" th:text="${album.genre} + ' • ' + ${album.releaseYear}"></p>
+
+                    <!-- Komunikat o dostępności -->
+                    <div class="availability-message" th:classappend="|availability-${album.availabilityStatus}|">
+                        <span th:text="${album.availabilityMessage}"></span>
+                        <span th:if="${album.lowStock}" class="stock-count" th:text="'(' + ${album.stockQuantity} + ')'"></span>
+                    </div>
+
+                    <p class="price" th:text="'$' + ${#numbers.formatDecimal(album.price, 1, 2)}"></p>
+                    <div class="album-actions">
+                        <a th:href="@{/album/{id}(id=${album.id})}" class="btn btn-secondary">Szczegóły</a>
+                        <form th:action="@{/cart/add}" method="post" style="display: inline;"
+                              th:if="${album.available}">
+                            <input type="hidden" name="albumId" th:value="${album.id}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-primary">Dodaj do koszyka</button>
+                        </form>
+                        <button th:unless="${album.available}" class="btn btn-disabled" disabled>
+                            Niedostępny
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Komunikat gdy brak albumów -->
+        <div class="no-results" th:if="${albums == null or albums.isEmpty()}">
+            <div class="empty-state">
+                <h2>Nie znaleziono albumów</h2>
+                <p th:if="${param.genre != null}">Brak albumów w kategorii: <strong th:text="${param.genre[0]}"></strong></p>
+                <p th:unless="${param.genre != null}">Brak dostępnych albumów.</p>
+                <!-- Zmieniono przycisk na czyszczenie filtru jeśli jest aktywny -->
+                <a th:href="@{/albums}" class="btn btn-primary" th:if="${param.genre}">Wyczyść filtr</a>
+                <a th:href="@{/albums}" class="btn btn-primary" th:unless="${param.genre}">Zobacz wszystkie albumy</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+<script th:src="@{/js/script.js}"></script>
+
+<script>
+    function handleImageError(img) {
+        var title = img.getAttribute('data-title') || 'No Image';
+        var encodedTitle = encodeURIComponent(title);
+        img.src = 'https://via.placeholder.com/300x300/2c3e50/ffffff?text=' + encodedTitle;
+        img.onerror = null; // Zapobiegaj zapętleniu
+    }
+</script>
+</body>
+</html>
